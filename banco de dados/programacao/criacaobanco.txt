@@ -1,34 +1,9 @@
--- entidade central - clinica tera 1 ou varios responsaveis, 
--- table responsavel chamara o ID da clinica - foreign key - 1 responsavel sera responsavel por apenas 1 clinica
--- table medvet - 1 clinica pode ter varios medicos vet e 1 med vet pode trabalhar em varias clinicas
--- mv clinica - foreign key medvet_id e clinica_id
--- consultas so tem 1 medico vet, e 1 consulta tem so 1 paciente, mas 1 med vet pode ter 1 ou varias consultas e os pacientes tambem; 1 clinica pode ter 1 ou vaeias consultas e 1 consulta pertence a apenas 1 clinica
--- tabela central, se eu quero a lista de pacientes a tabela central é a de pacientes, funciona do mesmo jeito com as outras
--- lista quantitativa de medicos tem como entidade centrar mv_clinica
--- pacientes por medico por clinica tem como tabela principal a tabela consulta
--- lista quantitativa por mes e ano por clinica com medidos tem entidade consulta
--- quantitativa de consultas por paciente por medico
-
-
 CREATE TABLE tb_clinica(
     clinica_id INT PRIMARY KEY AUTO_INCREMENT,
     clinica_nome VARCHAR(50),
     clinica_end VARCHAR(100),
     clinica_site VARCHAR(100),
     clinica_fone VARCHAR(20)
-);
-
-CREATE TABLE tb_consulta(
-    consulta_id INT PRIMARY KEY AUTO_INCREMENT,
-    fk_clinica_id INT,
-    fk_consulta_mv INT,
-    fk_consulta_pac INT,
-    consulta_data DATE,
-    consulta_desc VARCHAR(255),
-    consulta_hora TIME
-    FOREIGN KEY (fk_clinica_id) REFERENCES tb_clinica(clinica_id),
-    FOREIGN KEY (fk_consulta_mv) REFERENCES tb_med_vet(med_vet_id),
-    FOREIGN KEY (fk_consulta_pac) REFERENCES tb_paciente(pac_id)
 );
 
 CREATE TABLE tb_med_vet(
@@ -40,9 +15,9 @@ CREATE TABLE tb_med_vet(
 
 CREATE TABLE tb_mv_clinica(
     mv_clinica_id INT PRIMARY KEY AUTO_INCREMENT,
-    fk_med_vet_id INT,
+    fk_med_id INT,
     fk_clinica_id INT,
-    FOREIGN KEY (fk_med_vet_id) REFERENCES tb_med_vet(med_id),
+    FOREIGN KEY (fk_med_id) REFERENCES tb_med_vet(med_id),
     FOREIGN KEY (fk_clinica_id) REFERENCES tb_clinica(clinica_id)
 );
 
@@ -53,7 +28,7 @@ CREATE TABLE tb_paciente(
     pac_cel VARCHAR(20),
     pac_email VARCHAR(100),
     pac_raca VARCHAR(50),
-    pac_tutor VARCHAR(50)
+    pac_tutor VARCHAR(50),
     FOREIGN KEY (fk_clinica_id) REFERENCES tb_clinica(clinica_id)
 );
 
@@ -66,6 +41,18 @@ CREATE TABLE tb_responsavel(
     resp_crmv VARCHAR(20)
 );
 
+CREATE TABLE tb_consulta(
+    consulta_id INT PRIMARY KEY AUTO_INCREMENT,
+    fk_clinica_id INT,
+    fk_consulta_mv INT,
+    fk_consulta_pac INT,
+    consulta_data DATE,
+    consulta_desc VARCHAR(255),
+    consulta_hora TIME,
+    FOREIGN KEY (fk_clinica_id) REFERENCES tb_clinica(clinica_id),
+    FOREIGN KEY (fk_consulta_mv) REFERENCES tb_med_vet(med_id),
+    FOREIGN KEY (fk_consulta_pac) REFERENCES tb_paciente(pac_id)
+);
 
 INSERT INTO tb_clinica (clinica_nome, clinica_end, clinica_site, clinica_fone) 
 VALUES 
@@ -95,13 +82,13 @@ INSERT INTO tb_consulta(fk_clinica_id, fk_consulta_mv, fk_consulta_pac, consulta
 VALUES
 (1, 1, 1, '2025-05-15', 'Consulta de acompanhamento', '10:00:00'),
 (2, 2, 2, '2025-05-10', 'Check-Up anual', '15:00:00'),
-(3, 3, 3, '2025-07-18', 'Consulta de emergência', '08:00:00')
+(3, 3, 3, '2025-07-18', 'Consulta de emergência', '08:00:00');
 
-INSERT INTO tb_mv_clinica(fk_med_vet_id, fk_clinica_id)
+INSERT INTO tb_mv_clinica(fk_med_id, fk_clinica_id)
 VALUES
 (1, 1),
 (2, 2),
-(3, 3)
+(3, 3);
 
 SELECT * FROM tb_clinica;
 SELECT * FROM tb_med_vet;
@@ -116,7 +103,7 @@ SELECT clinica_id, pac_id,
 pac_nome, pac_raca,
 clinica_nome
 FROM tb_paciente
-LEFT JOIN tb_clinica ON fk_clinica_id = clinica_id
+LEFT JOIN tb_clinica ON fk_clinica_id = clinica_id;
 
 CREATE VIEW vw_lista_consultas
 AS
@@ -124,17 +111,16 @@ SELECT clinica_id, consulta_id,
 consulta_data, consulta_desc, consulta_hora,
 clinica_nome
 FROM tb_consulta
-LEFT JOIN tb_clinica on fk_clinica_id = clinica_id
+LEFT JOIN tb_clinica on fk_clinica_id = clinica_id;
 
 CREATE VIEW vw_med_por_clinica
 AS
 SELECT clinica_id, 
-clinica_nome, 
-med_id, med_nome,
-COUNT(tb_mv_clinica.fk_med_vet_id) AS qnt_med
+clinica_nome,
+COUNT(tb_mv_clinica.fk_med_id) AS qnt_med
 FROM tb_clinica
 LEFT JOIN tb_mv_clinica ON tb_clinica.clinica_id = tb_mv_clinica.fk_clinica_id
-GROUP BY tb_clinica.clinica_id, tb_clinica.clinica_nome;
+GROUP BY clinica_id, clinica_nome;
 
 CREATE VIEW vw_pac_med_clinica
 AS
@@ -143,6 +129,59 @@ clinica_nome, med_nome, pac_nome,
 COUNT(tb_paciente.pac_id) AS qnt_pac
 FROM tb_clinica
 LEFT JOIN tb_mv_clinica ON tb_clinica.clinica_id = tb_mv_clinica.fk_clinica_id
-LEFT JOIN tb_med_vet ON tb_mv_clinica.fk_med_vet_id = tb_med_vet.med_id
+LEFT JOIN tb_med_vet ON tb_mv_clinica.fk_med_id = tb_med_vet.med_id
 LEFT JOIN tb_paciente ON tb_clinica.clinica_id = tb_paciente.fk_clinica_id
-GROUP BY tb_clinica.clinica_id, tb_clinica.clinica_nome
+GROUP BY clinica_id, clinica_nome, med_id, med_nome, pac_id, pac_nome;
+
+CREATE VIEW vw_qnt_consultas_mes
+AS
+SELECT clinica_id, med_id, 
+clinica_nome, med_nome,
+COUNT(tb_consulta.consulta_id) AS qnt_consultas,
+MONTH(tb_consulta.consulta_data) AS mes_consultas
+FROM tb_clinica
+LEFT JOIN tb_consulta ON tb_consulta.consulta_id = tb_clinica.clinica_id
+LEFT JOIN tb_med_vet  ON tb_med_vet.med_id = tb_consulta.fk_consulta_mv
+GROUP BY clinica_id, med_id, clinica_nome, med_nome, MONTH(tb_consulta.consulta_data);
+
+CREATE VIEW vw_qnt_consulta_cliente
+AS
+SELECT consulta_id, pac_id, med_id,
+pac_nome, med_nome,
+COUNT(tb_consulta.fk_consulta_pac) AS qnt_consulta
+FROM tb_consulta
+LEFT JOIN tb_paciente ON tb_consulta.fk_consulta_pac = tb_paciente.pac_id
+LEFT JOIN tb_med_vet ON tb_consulta.fk_consulta_mv = tb_med_vet.med_id
+GROUP BY consulta_id, pac_id, pac_nome, med_id, med_nome;
+
+UPDATE tb_paciente
+SET pac_tutor = 'tutor_novo01'
+WHERE pac_id = 1;
+
+UPDATE tb_paciente
+SET pac_email = 'novoemail@email.com'
+WHERE pac_id = 3;
+
+UPDATE tb_paciente
+SET pac_nome = 'Juju'
+WHERE pac_id = 2;
+
+UPDATE tb_med_vet
+SET med_nome = 'Vinicius Trevisan'
+WHERE med_id = 1;
+
+UPDATE tb_med_vet
+SET med_nome = 'Ana Julia Gunha'
+WHERE med_id = 3;
+
+UPDATE tb_consulta
+SET consulta_data = '2029-02-08'
+WHERE consulta_id = 2;
+
+UPDATE tb_consulta
+SET consulta_hora = '09:30:00'
+WHERE consulta_id = 2;
+
+UPDATE tb_consulta
+SET consulta_data = '2000-07-15'
+WHERE consulta_id = 3;
