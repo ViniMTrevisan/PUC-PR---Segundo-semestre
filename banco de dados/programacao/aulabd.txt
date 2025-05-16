@@ -166,3 +166,54 @@ SELECT * FROM vw_matricula_curso;
 SELECT curso_nome, COUNT(aluno_id) AS num_alunos_matriculados 
 FROM vw_matricula_curso
 GROUP BY (curso_nome);
+
+--- dia 14/05
+--- usar x.y para passar nota em float 
+--- operador media dentro de um UPDATE
+--- para calcular a media de notas em tabelas separadas: primeiro, alterarei a tabela que quero inserir a nova nota, calcula a nota sendo = a soma das notas / numero das notas
+--- clausula IN, LIKE - o IN verifica se existe aquele elemento em uma lista
+
+SELECT * FROM vw_historico_realizado
+
+CREATE TABLE tb_boletim(
+	boletim_id INT PRIMARY KEY AUTO_INCREMENT,
+    boletim_id_matricula INT,
+    boletim_nota1 FLOAT,
+    boletim_nota2 FLOAT,
+    boletim_nota3 FLOAT,
+    FOREIGN KEY (boletim_id_matricula) REFERENCES tb_matricula (mat_id)
+);
+
+SELECT * FROM tb_matricula;
+
+INSERT INTO tb_boletim (boletim_id_matricula, boletim_nota1, boletim_nota2, boletim_nota3) VALUES 
+(1, 9.5, 8.2, 6.1)
+
+SELECT mat_id, mat_nota, 
+boletim_nota1, boletim_nota2, boletim_nota3
+FROM tb_matricula
+INNER JOIN tb_boletim ON tb_boletim.boletim_id_matricula = tb_matricula.mat_id; -- se eu usar LEFT JOIN, ele trará todas as matriculas, diferente do inner join, que so tras as que existem
+
+SELECT * FROM vw_historico_realizado;
+
+SELECT curso_nome, aluno_nome, disc_nome, vw.mat_nota, 
+boletim_nota1, boletim_nota2, boletim_nota3
+FROM tb_matricula
+INNER JOIN tb_boletim ON tb_boletim.boletim_id_matricula = 
+tb_matricula.mat_id
+LEFT JOIN vw_historico_realizado vw ON vw.mat_id = tb_matricula.mat_id;
+-- vw apos o vw_historico_realizado é uma apelido, para criar o nome de uma tabela diferente e nao deixar o codigo ambiguo. 
+
+UPDATE tb_matricula
+SET mat_nota = 
+(SELECT (boletim_nota1+boletim_nota2+boletim_nota3)/3 FROM tb_boletim WHERE tb_boletim.boletim_id_matricula = tb_matricula.mat_id)
+WHERE mat_id IN 
+(SELECT tb_boletim.boletim_id_matricula FROM tb_boletim) -- retorna todos os mat_ids da tabela boletim
+AND tb_matricula.mat_nota IS NULL;
+
+INSERT INTO tb_boletim(boletim_id_matricula, boletim_nota1, boletim_nota2, boletim_nota3) 
+VALUES 
+(2,5,6,7) -- fizemos isso para os 9 indices da tabela depois disso, rodamos o UPDATE tb_matricula acima
+
+
+
