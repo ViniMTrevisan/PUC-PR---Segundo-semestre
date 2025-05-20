@@ -1,3 +1,6 @@
+CREATE DATABASE db_clinica;
+USE db_clinica;
+
 CREATE TABLE tb_clinica(
     clinica_id INT PRIMARY KEY AUTO_INCREMENT,
     clinica_nome VARCHAR(50),
