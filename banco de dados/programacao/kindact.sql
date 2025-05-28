@@ -1035,7 +1035,7 @@ SELECT
     v.voluntario_nome,
     e.evento_titulo,
     e.evento_data_inicio,
-    e.evento_local
+    e.evento_endereco
 FROM
     tb_voluntario v
     JOIN tb_voluntario_evento ve ON v.voluntario_id = ve.fk_voluntario_id
