@@ -1142,3 +1142,32 @@ FROM
     JOIN tb_curadoria c ON vc.fk_curadoria_id = c.curadoria_id
 WHERE
     vc.voluntario_curadoria_status_aprovacao IN ('Aprovado', 'Pendente');
+CREATE VIEW 
+    vw_voluntarios_cadastrados AS
+SELECT
+    v.voluntario_id,
+    v.voluntario_nome,
+    o.ong_id,
+    o.ong_nome,
+    o.ong_area_atuacao
+FROM
+    tb_voluntario v
+    JOIN tb_ong o ON v.voluntario_id = o.ong_id
+WHERE
+    v.voluntario_id IS NOT NULL;
+
+CREATE VIEW 
+    vw_eventos_cadastrados AS
+SELECT
+    e.evento_id,
+    e.evento_titulo,
+    e.evento_data_inicio,
+    e.evento_data_termino,
+    o.ong_id,
+    o.ong_nome
+FROM
+    tb_evento e
+    JOIN tb_ong o ON e.fk_ong_id = o.ong_id
+WHERE
+    e.evento_id IS NOT NULL;
+    
