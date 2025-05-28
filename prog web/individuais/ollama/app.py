@@ -2,40 +2,45 @@ from flask import Flask, request, jsonify, send_from_directory
 from ollama import chat
 from pydantic import BaseModel
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 
 class Country(BaseModel):
     name: str
     capital: str
     languages: list[str]
 
-# NOVO MODELO E FUNÇÃO
-class CountryAlt(BaseModel):
-    country_name: str
-    main_city: str
-    spoken_languages: list[str]
+class Scientist(BaseModel):
+    name: str
+    field: str
+    notable_work: str
 
-@app.route('/ask_alt', methods=['POST'])
-def ask_country_alt():
+@app.route('/ask', methods=['POST'])
+def ask_country():
     data = request.get_json()
-
     if not data or 'message' not in data:
         return jsonify({'error': 'Missing "message" field'}), 400
-
     user_message = data['message']
-
-    # Chamar o modelo com o novo formato
     response = chat(
         messages=[{'role': 'user', 'content': user_message}],
         model='gemma3',
-        format=CountryAlt.model_json_schema(),
+        format=Country.model_json_schema(),
     )
-
-    # Validar e converter para objeto CountryAlt
-    country = CountryAlt.model_validate_json(response.message.content)
-
-    # Retornar como JSON
+    country = Country.model_validate_json(response.message.content)
     return jsonify(country.dict())
+
+@app.route('/ask_scientist', methods=['POST'])
+def ask_scientist():
+    data = request.get_json()
+    if not data or 'message' not in data:
+        return jsonify({'error': 'Missing "message" field'}), 400
+    user_message = data['message']
+    response = chat(
+        messages=[{'role': 'user', 'content': user_message}],
+        model='gemma3',
+        format=Scientist.model_json_schema(),
+    )
+    scientist = Scientist.model_validate_json(response.message.content)
+    return jsonify(scientist.dict())
 
 @app.route('/')
 def index():
