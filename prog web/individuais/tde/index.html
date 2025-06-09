@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Ollama</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    input {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+      margin-right: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    #resposta {
+      margin-top: 20px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ollama</h1>
+  
+  <input type="text" id="pergunta" placeholder="Digite sua pergunta">
+  <button onclick="enviarPergunta()">Perguntar</button>
+  
+  <h3>Resposta:</h3>
+  <div id="resposta"></div>
+
+  <script>
+    function enviarPergunta() {
+      const pergunta = document.getElementById('pergunta').value;
+      const respostaElem = document.getElementById('resposta');
+      respostaElem.textContent = "Carregando...";
+
+      fetch('http://127.0.0.1:5000/api/perguntar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pergunta: pergunta })
+      })
+      .then(response => response.json())
+      .then(data => {
+        respostaElem.textContent = data.resposta || 'Sem resposta.';
+      })
+      .catch(error => {
+        respostaElem.textContent = 'Erro ao se comunicar com a API.';
+        console.error('Erro:', error);
+      });
+    }
+  </script>
+</body>
+</html>
