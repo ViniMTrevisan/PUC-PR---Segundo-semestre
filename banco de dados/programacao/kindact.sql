@@ -1142,10 +1142,6 @@ FROM
     JOIN tb_curadoria c ON vc.fk_curadoria_id = c.curadoria_id
 WHERE
     vc.voluntario_curadoria_status_aprovacao IN ('Aprovado', 'Pendente');
-<<<<<<< HEAD
-=======
-
->>>>>>> 35bf9ac (deixa eu upar isso por favor)
 CREATE VIEW 
     vw_voluntarios_cadastrados AS
 SELECT
@@ -1174,11 +1170,7 @@ FROM
     JOIN tb_ong o ON e.fk_ong_id = o.ong_id
 WHERE
     e.evento_id IS NOT NULL;
-<<<<<<< HEAD
     
-=======
-    
->>>>>>> 35bf9ac (deixa eu upar isso por favor)
 DELIMITER $$
 
 CREATE PROCEDURE sp_inserir_mensagem(
