@@ -2,8 +2,8 @@ import socket
 import threading
 
 # Configurações do servidor
-ENDEREÇO = '127.0.0.1'  # Endereço local
-PORTA = 12345           # Porta para conexão
+localhost = '127.0.0.1'  # localhost local
+porta = 12345           # porta para conexão
 clientes = []           # Lista de conexões dos clientes
 nomes = []              # Lista de nomes dos clientes
 
@@ -26,7 +26,7 @@ def remover_cliente(conexão):
         nomes.remove(nome)
         retransmitir(f"{nome} saiu do chat.\n".encode('utf-8'))
 
-def gerenciar_cliente(conexão, endereço):
+def gerenciar_cliente(conexão, localhost):
     # Recebe o nome do cliente
     nome = conexão.recv(1024).decode('utf-8')
     nomes.append(nome)
@@ -50,9 +50,9 @@ def gerenciar_cliente(conexão, endereço):
 def principal():
     # Cria o socket TCP
     servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    servidor.bind((ENDEREÇO, PORTA))
+    servidor.bind((localhost, porta))
     servidor.listen(5)
-    print(f"Servidor TCP rodando em {ENDEREÇO}:{PORTA}")
+    print(f"Servidor TCP rodando em {localhost}:{porta}")
 
     while True:
         conexão, endereço = servidor.accept()
