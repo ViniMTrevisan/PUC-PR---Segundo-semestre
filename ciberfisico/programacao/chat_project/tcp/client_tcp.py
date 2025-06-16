@@ -3,38 +3,38 @@ import threading
 import sys
 
 # Configurações do cliente
-localhost = '127.0.0.1'
-porta = 12345
+HOST = '127.0.0.1'
+PORT = 12345
 
-def receber_mensagens(cliente):
+def receber_mensagens(client):
     # Recebe mensagens do servidor
     while True:
         try:
-            mensagem = cliente.recv(1024).decode('utf-8')
+            mensagem = client.recv(1024).decode('utf-8')
             if not mensagem:
                 print("Conexão com o servidor perdida.")
                 sys.exit()
             print(mensagem, end='')  # Exibe a mensagem com newline
         except:
             print("Erro ao receber mensagem. Desconectando...")
-            cliente.close()
+            client.close()
             sys.exit()
 
-def principal():
+def main():
     # Cria o socket TCP
-    cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        cliente.connect((localhost, porta))
+        client.connect((HOST, PORT))
     except:
         print("Não foi possível conectar ao servidor.")
         return
 
     # Envia o nome do cliente
     nome = input("Digite seu nome: ")
-    cliente.send(nome.encode('utf-8'))
+    client.send(nome.encode('utf-8'))
 
     # Inicia thread para receber mensagens
-    thread_recebimento = threading.Thread(target=receber_mensagens, args=(cliente,))
+    thread_recebimento = threading.Thread(target=receber_mensagens, args=(client,))
     thread_recebimento.daemon = True  # Thread termina quando o programa sai
     thread_recebimento.start()
 
@@ -43,14 +43,14 @@ def principal():
         try:
             mensagem = input()  # Lê entrada do usuário
             if mensagem.strip() == '/sair':
-                cliente.send(mensagem.encode('utf-8'))
+                client.send(mensagem.encode('utf-8'))
                 break
-            cliente.send(f"{mensagem}\n".encode('utf-8'))  # Adiciona newline
+            client.send(f"{mensagem}\n".encode('utf-8'))  # Adiciona newline
         except:
             print("Erro ao enviar mensagem. Desconectando...")
             break
 
-    cliente.close()
+    client.close()
 
 if __name__ == "__main__":
-    principal()
+    main()

@@ -1,48 +1,48 @@
 import socket
 
 # Configurações do servidor
-localhost = '127.0.0.1'
-PORTA = 12346
-clientes = []  # Lista de localhosts dos clientes
+HOST = '127.0.0.1'
+PORT = 12346
+clientes = []  # Lista de endereços dos clientes
 nomes = []     # Lista de nomes dos clientes
 
-def retransmitir(mensagem, localhost_remetente=None):
+def retransmitir(mensagem, endereco_remetente=None):
     # Envia a mensagem para todos os clientes, exceto o remetente
-    for cliente in clientes:
-        if cliente != localhost_remetente:
-            servidor.sendto(mensagem, cliente)
+    for client in clientes:
+        if client != endereco_remetente:
+            server.sendto(mensagem, client)
 
-def principal():
+def main():
     # Cria o socket UDP
-    global servidor
-    servidor = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    servidor.bind((localhost, PORTA))
-    print(f"Servidor UDP rodando em {localhost}:{PORTA}")
+    global server
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server.bind((HOST, PORT))
+    print(f"Servidor UDP rodando em {HOST}:{PORT}")
 
     while True:
-        # Recebe mensagem e localhost do cliente
-        dados, localhost = servidor.recvfrom(1024)
+        # Recebe mensagem e endereço do cliente
+        dados, endereco = server.recvfrom(1024)
         mensagem = dados.decode('utf-8')
 
-        # Se o localhost não está na lista, é um novo cliente
-        if localhost not in clientes:
+        # Se o endereço não está na lista, é um novo cliente
+        if endereco not in clientes:
             nomes.append(mensagem)
-            clientes.append(localhost)
-            retransmitir(f"{mensagem} entrou no chat.\n".encode('utf-8'), localhost)
+            clientes.append(endereco)
+            retransmitir(f"{mensagem} entrou no chat.\n".encode('utf-8'), endereco)
             continue
 
         # Verifica se é o comando /sair
         if mensagem.strip() == '/sair':
-            índice = clientes.index(localhost)
-            nome = nomes[índice]
-            clientes.remove(localhost)
+            indice = clientes.index(endereco)
+            nome = nomes[indice]
+            clientes.remove(endereco)
             nomes.remove(nome)
-            retransmitir(f"{nome} saiu do chat.\n".encode('utf-8'), localhost)
+            retransmitir(f"{nome} saiu do chat.\n".encode('utf-8'), endereco)
         else:
             # Envia a mensagem com o nome do cliente
-            índice = clientes.index(localhost)
-            nome = nomes[índice]
-            retransmitir(f"{nome}: {mensagem}\n".encode('utf-8'), localhost)
+            indice = clientes.index(endereco)
+            nome = nomes[indice]
+            retransmitir(f"{nome}: {mensagem}\n".encode('utf-8'), endereco)
 
 if __name__ == "__main__":
-    principal()
+    main()

@@ -2,63 +2,61 @@ import socket
 import threading
 
 # Configurações do servidor
-localhost = '127.0.0.1'  # localhost local
-porta = 12345           # porta para conexão
-clientes = []           # Lista de conexões dos clientes
-nomes = []              # Lista de nomes dos clientes
+HOST = '127.0.0.1'  # Endereço local
+PORT = 12345        # Porta para conexão
+clientes = []       # Lista de conexões dos clientes
+nomes = []          # Lista de nomes dos clientes
 
-def retransmitir(mensagem, conexão_remetente=None):
+def retransmitir(mensagem, conexao_remetente=None):
     # Envia a mensagem para todos os clientes, exceto o remetente
-    for cliente in clientes:
-        if cliente != conexão_remetente:
+    for client in clientes:
+        if client != conexao_remetente:
             try:
-                cliente.send(mensagem)
+                client.send(mensagem)
             except:
-                cliente.close()
-                remover_cliente(cliente)
+                client.close()
+                remover_cliente(client)
 
-def remover_cliente(conexão):
+def remover_cliente(conexao):
     # Remove um cliente da lista
-    if conexão in clientes:
-        índice = clientes.index(conexão)
-        nome = nomes[índice]
-        clientes.remove(conexão)
+    if conexao in clientes:
+        indice = clientes.index(conexao)
+        nome = nomes[indice]
+        clientes.remove(conexao)
         nomes.remove(nome)
         retransmitir(f"{nome} saiu do chat.\n".encode('utf-8'))
 
-def gerenciar_cliente(conexão, localhost):
+def gerenciar_cliente(conexao, endereco):
     # Recebe o nome do cliente
-    nome = conexão.recv(1024).decode('utf-8')
+    nome = conexao.recv(1024).decode('utf-8')
     nomes.append(nome)
-    clientes.append(conexão)
+    clientes.append(conexao)
     retransmitir(f"{nome} entrou no chat.\n".encode('utf-8'))  # Notifica entrada
 
     while True:
         # Recebe mensagens do cliente
         try:
-            mensagem = conexão.recv(1024).decode('utf-8')
+            mensagem = conexao.recv(1024).decode('utf-8')
             if not mensagem or mensagem.strip() == '/sair':
                 break
-            # Adiciona newline à mensagem e retransmite
-            retransmitir(f"{nome}: {mensagem}\n".encode('utf-8'), conexão)
+            retransmitir(f"{nome}: {mensagem}\n".encode('utf-8'), conexao)
         except:
             break
-    # Remove o cliente ao desconectar
-    remover_cliente(conexão)
-    conexão.close()
+    remover_cliente(conexao)
+    conexao.close()
 
-def principal():
+def main():
     # Cria o socket TCP
-    servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    servidor.bind((localhost, porta))
-    servidor.listen(5)
-    print(f"Servidor TCP rodando em {localhost}:{porta}")
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((HOST, PORT))
+    server.listen(5)
+    print(f"Servidor TCP rodando em {HOST}:{PORT}")
 
     while True:
-        conexão, endereço = servidor.accept()
+        conexao, endereco = server.accept()
         # Inicia uma thread para cada cliente
-        thread = threading.Thread(target=gerenciar_cliente, args=(conexão, endereço))
+        thread = threading.Thread(target=gerenciar_cliente, args=(conexao, endereco))
         thread.start()
 
 if __name__ == "__main__":
-    principal()
+    main()
