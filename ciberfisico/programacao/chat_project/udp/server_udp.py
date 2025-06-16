@@ -1,48 +1,48 @@
 import socket
 
 # Configurações do servidor
-HOST = '127.0.0.1'
-PORT = 12346
-clients = []  # Lista de endereços dos clientes
-names = []    # Lista de nomes dos clientes
+ENDEREÇO = '127.0.0.1'
+PORTA = 12346
+clientes = []  # Lista de endereços dos clientes
+nomes = []     # Lista de nomes dos clientes
 
-def broadcast(message, sender_addr=None):
+def retransmitir(mensagem, endereço_remetente=None):
     # Envia a mensagem para todos os clientes, exceto o remetente
-    for client in clients:
-        if client != sender_addr:
-            server.sendto(message, client)
+    for cliente in clientes:
+        if cliente != endereço_remetente:
+            servidor.sendto(mensagem, cliente)
 
-def main():
+def principal():
     # Cria o socket UDP
-    global server
-    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server.bind((HOST, PORT))
-    print(f"Servidor UDP rodando em {HOST}:{PORT}")
+    global servidor
+    servidor = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    servidor.bind((ENDEREÇO, PORTA))
+    print(f"Servidor UDP rodando em {ENDEREÇO}:{PORTA}")
 
     while True:
         # Recebe mensagem e endereço do cliente
-        data, addr = server.recvfrom(1024)
-        message = data.decode('utf-8')
+        dados, endereço = servidor.recvfrom(1024)
+        mensagem = dados.decode('utf-8')
 
         # Se o endereço não está na lista, é um novo cliente
-        if addr not in clients:
-            names.append(message)
-            clients.append(addr)
-            broadcast(f"{message} entrou no chat.\n".encode('utf-8'), addr)
+        if endereço not in clientes:
+            nomes.append(mensagem)
+            clientes.append(endereço)
+            retransmitir(f"{mensagem} entrou no chat.\n".encode('utf-8'), endereço)
             continue
 
         # Verifica se é o comando /sair
-        if message.strip() == '/sair':
-            index = clients.index(addr)
-            name = names[index]
-            clients.remove(addr)
-            names.remove(name)
-            broadcast(f"{name} saiu do chat.\n".encode('utf-8'), addr)
+        if mensagem.strip() == '/sair':
+            índice = clientes.index(endereço)
+            nome = nomes[índice]
+            clientes.remove(endereço)
+            nomes.remove(nome)
+            retransmitir(f"{nome} saiu do chat.\n".encode('utf-8'), endereço)
         else:
             # Envia a mensagem com o nome do cliente
-            index = clients.index(addr)
-            name = names[index]
-            broadcast(f"{name}: {message}\n".encode('utf-8'), addr)
+            índice = clientes.index(endereço)
+            nome = nomes[índice]
+            retransmitir(f"{nome}: {mensagem}\n".encode('utf-8'), endereço)
 
 if __name__ == "__main__":
-    main()
+    principal()
