@@ -3,8 +3,8 @@ import threading
 import sys
 
 # Configurações do cliente
-ENDEREÇO = '127.0.0.1'
-PORTA = 12345
+localhost = '127.0.0.1'
+porta = 12345
 
 def receber_mensagens(cliente):
     # Recebe mensagens do servidor
@@ -24,7 +24,7 @@ def principal():
     # Cria o socket TCP
     cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        cliente.connect((ENDEREÇO, PORTA))
+        cliente.connect((localhost, porta))
     except:
         print("Não foi possível conectar ao servidor.")
         return

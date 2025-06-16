@@ -3,8 +3,8 @@ import threading
 import sys
 
 # Configurações do cliente
-ENDEREÇO = '127.0.0.1'
-PORTA = 12346
+localhost = '127.0.0.1'
+porta = 12346
 
 def receber_mensagens(cliente):
     # Recebe mensagens do servidor
@@ -22,7 +22,7 @@ def principal():
 
     # Envia o nome do cliente
     nome = input("Digite seu nome: ")
-    cliente.sendto(nome.encode('utf-8'), (ENDEREÇO, PORTA))
+    cliente.sendto(nome.encode('utf-8'), (localhost, porta))
 
     # Inicia thread para receber mensagens
     thread_recebimento = threading.Thread(target=receber_mensagens, args=(cliente,))
@@ -34,9 +34,9 @@ def principal():
         try:
             mensagem = input()
             if mensagem.strip() == '/sair':
-                cliente.sendto(mensagem.encode('utf-8'), (ENDEREÇO, PORTA))
+                cliente.sendto(mensagem.encode('utf-8'), (localhost, porta))
                 break
-            cliente.sendto(f"{mensagem}\n".encode('utf-8'), (ENDEREÇO, PORTA))
+            cliente.sendto(f"{mensagem}\n".encode('utf-8'), (localhost, porta))
         except:
             print("Erro ao enviar mensagem. Desconectando...")
             break
