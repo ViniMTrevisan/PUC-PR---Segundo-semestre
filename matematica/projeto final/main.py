@@ -1,32 +1,46 @@
-import pygame as pg  # Importa a biblioteca Pygame e a renomeia como 'pg'
-import random  # Importa a biblioteca random para gerar números aleatórios
+import pygame as pg
+import random
 
-# Cores do jogo
+# Cores
 branco = (255, 255, 255)
 preto = (0, 0, 0)
 
-# Setup da tela
+# Setup da janela
+pg.init()
 window = pg.display.set_mode((1000, 600))
+pg.display.set_caption("Forca com Matemática")
 
-# Inicializa fontes
+# Fonte
 pg.font.init()
 fonte = pg.font.SysFont("Courier New", 50)
 fonte_rb = pg.font.SysFont("Courier New", 30)
 
-# Lista de palavras
-palavras = ['PARALELEPIPEDO', 'ORNITORINCO', 'APARTAMENTO', 'XICARA DE CHA']
+# Palavras do jogo
+palavras = ['PARALELEPIPEDO', 'ORNITORINCO', 'APARTAMENTO', 'XICARA']
 
-# Variáveis iniciais
+# Perguntas e respostas
+perguntas = [
+    ("Qual matéria apareceu em A ∩ C?", "matematica"),
+    ("Qual matéria apareceu em B ∩ D?", "historia"),
+    ("Quais matérias estão em C mas não em A ou D?", "ed. fisica e biologia"),
+    ("Qual matéria só está em A?", "portugues"),
+    ("Qual matéria só está em D?", "redacao"),
+    ("Se eu não sou aprovado, então eu...?", "nao estudo"),
+    ("(p → q) e (q → p) equivale a quê?", "bicondicional"),
+    ("Se leio e faço exercícios, então eu...?", "leio"),
+    ("(p ∨ q) ∨ r = ?", "p ∨ (q ∨ r)"),
+    ("Faço a tarefa se, e somente se...", "passo na prova e estudo"),
+]
+
+# Variáveis de jogo
 tentativas_de_letras = [' ', '-']
 palavra_escolhida = ''
 palavra_camuflada = ''
 end_game = True
 chance = 0
-letra = ' '
 click_last_status = False
 
 
-# Desenha a forca com base nas chances
 def Desenho_da_Forca(window, chance):
     pg.draw.rect(window, branco, (0, 0, 1000, 600))
     pg.draw.line(window, preto, (100, 500), (100, 100), 10)
@@ -48,86 +62,80 @@ def Desenho_da_Forca(window, chance):
         pg.draw.line(window, preto, (300, 350), (225, 450), 10)
 
 
-# Desenha o botão de reiniciar
 def Desenho_Restart_Button(window):
     pg.draw.rect(window, preto, (700, 100, 200, 65))
     texto = fonte_rb.render('Restart', 1, branco)
     window.blit(texto, (740, 120))
 
 
-# Sorteia uma palavra nova
-def Sorteando_Palavra(palavras, palavra_escolhida, end_game):
-    if end_game:
-        palavra_n = random.randint(0, len(palavras) - 1)
-        palavra_escolhida = palavras[palavra_n]
-        end_game = False
-    return palavra_escolhida, end_game
+def Sorteando_Palavra():
+    return random.choice(palavras)
 
 
-# Camufla a palavra escondendo letras não tentadas
-def Camuflando_Palavra(palavra_escolhida, palavra_camuflada, tentativas_de_letras):
-    palavra_camuflada = palavra_escolhida
-    for n in range(len(palavra_camuflada)):
-        if palavra_camuflada[n:n + 1] not in tentativas_de_letras:
-            palavra_camuflada = palavra_camuflada.replace(palavra_camuflada[n], '#')
-    return palavra_camuflada
+def Camuflando_Palavra(palavra_escolhida, tentativas_de_letras):
+    return ''.join([letra if letra in tentativas_de_letras else '#' for letra in palavra_escolhida])
 
 
-# Processa a tentativa de letra
-def Tentando_uma_Letra(tentativas_de_letras, palavra_escolhida, letra, chance):
-    if letra not in tentativas_de_letras:
-        tentativas_de_letras.append(letra)
-        if letra not in palavra_escolhida:
-            chance += 1
-    return tentativas_de_letras, chance
-
-
-# Exibe a palavra na tela
 def Palavra_do_Jogo(window, palavra_camuflada):
     palavra = fonte.render(palavra_camuflada, 1, preto)
     window.blit(palavra, (200, 500))
 
 
-# Reinicia o jogo se o botão for clicado
-def Restart_do_Jogo(palavra_camuflada, end_game, chance, letra,
-                    tentativas_de_letras, click_last_status, click, x, y):
-    count = 0
-    limite = len(palavra_camuflada)
+def Pergunta_Matematica():
+    pergunta, resposta = random.choice(perguntas)
+    print("\n❓ Pergunta matemática:")
+    print(pergunta)
+    entrada = input("→ Sua resposta: ").strip().lower()
+    return entrada == resposta
 
-    for n in range(len(palavra_camuflada)):
-        if palavra_camuflada[n] != '#':
-            count += 1
 
-    if count == limite and click_last_status is False and click[0] is True:
+def Restart_do_Jogo(palavra_camuflada, click_last_status, click, x, y):
+    if '#' not in palavra_camuflada and not click_last_status and click[0]:
         if 700 <= x <= 900 and 100 <= y <= 165:
-            tentativas_de_letras = [' ', '-']
-            end_game = True
-            chance = 0
-            letra = ' '
-
-    return end_game, chance, tentativas_de_letras, letra
+            return True
+    return False
 
 
-# Loop principal do jogo
+# Início do jogo
+palavra_escolhida = Sorteando_Palavra()
+palavra_camuflada = Camuflando_Palavra(palavra_escolhida, tentativas_de_letras)
+
 while True:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             pg.quit()
             exit()
 
+        if event.type == pg.KEYDOWN and event.unicode.isalpha():
+            letra = event.unicode.upper()
+
+            if letra not in tentativas_de_letras:
+                if Pergunta_Matematica():
+                    tentativas_de_letras.append(letra)
+                    if letra not in palavra_escolhida:
+                        chance += 1
+                else:
+                    print("❌ Resposta incorreta! Você perdeu uma chance.")
+                    chance += 1
+
     x, y = pg.mouse.get_pos()
     click = pg.mouse.get_pressed()
 
+    if Restart_do_Jogo(palavra_camuflada, click_last_status, click, x, y):
+        palavra_escolhida = Sorteando_Palavra()
+        tentativas_de_letras = [' ', '-']
+        chance = 0
+
+    palavra_camuflada = Camuflando_Palavra(palavra_escolhida, tentativas_de_letras)
+
     Desenho_da_Forca(window, chance)
+    Palavra_do_Jogo(window, palavra_camuflada)
     Desenho_Restart_Button(window)
 
-    palavra_escolhida, end_game = Sorteando_Palavra(palavras, palavra_escolhida, end_game)
-    palavra_camuflada = Camuflando_Palavra(palavra_escolhida, palavra_camuflada, tentativas_de_letras)
-    Palavra_do_Jogo(window, palavra_camuflada)
-
-    end_game, chance, tentativas_de_letras, letra = Restart_do_Jogo(
-        palavra_camuflada, end_game, chance, letra, tentativas_de_letras, click_last_status, click, x, y)
-
     click_last_status = click[0]
-    
     pg.display.update()
+
+    if chance >= 6:
+        print(f"\n💀 Você perdeu! A palavra era: {palavra_escolhida}")
+        pg.quit()
+        break
