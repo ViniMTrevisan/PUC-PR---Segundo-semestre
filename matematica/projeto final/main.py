@@ -1,3 +1,18 @@
+"""
+Jogo da Forca com Perguntas Matemáticas
+
+Contexto:
+Em um colégio do Rio de Janeiro, foi feita uma pesquisa entre 4 turmas do 5º ano para descobrir
+quais eram as matérias favoritas. Os resultados foram:
+
+5ºA: A = {Matemática, Artes, Ciências, Português}
+5ºB: B = {Artes, História, Geografia, Ed. Física}
+5ºC: C = {Matemática, Ed. Física, Biologia, Física}
+5ºD: D = {Ciências, História, Física, Redação}
+
+As perguntas do jogo são baseadas em operações com esses conjuntos.
+"""
+
 import pygame as pg
 import random
 
@@ -40,7 +55,6 @@ end_game = True
 chance = 0
 click_last_status = False
 
-
 def Desenho_da_Forca(window, chance):
     pg.draw.rect(window, branco, (0, 0, 1000, 600))
     pg.draw.line(window, preto, (100, 500), (100, 100), 10)
@@ -61,25 +75,20 @@ def Desenho_da_Forca(window, chance):
     if chance >= 6:
         pg.draw.line(window, preto, (300, 350), (225, 450), 10)
 
-
 def Desenho_Restart_Button(window):
     pg.draw.rect(window, preto, (700, 100, 200, 65))
     texto = fonte_rb.render('Restart', 1, branco)
     window.blit(texto, (740, 120))
 
-
 def Sorteando_Palavra():
     return random.choice(palavras)
-
 
 def Camuflando_Palavra(palavra_escolhida, tentativas_de_letras):
     return ''.join([letra if letra in tentativas_de_letras else '#' for letra in palavra_escolhida])
 
-
 def Palavra_do_Jogo(window, palavra_camuflada):
     palavra = fonte.render(palavra_camuflada, 1, preto)
     window.blit(palavra, (200, 500))
-
 
 def Pergunta_Matematica():
     pergunta, resposta = random.choice(perguntas)
@@ -88,13 +97,11 @@ def Pergunta_Matematica():
     entrada = input("→ Sua resposta: ").strip().lower()
     return entrada == resposta
 
-
 def Restart_do_Jogo(palavra_camuflada, click_last_status, click, x, y):
     if '#' not in palavra_camuflada and not click_last_status and click[0]:
         if 700 <= x <= 900 and 100 <= y <= 165:
             return True
     return False
-
 
 # Início do jogo
 palavra_escolhida = Sorteando_Palavra()
