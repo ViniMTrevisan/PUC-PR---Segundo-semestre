@@ -9,10 +9,10 @@ Para instalar o pygame:
 pip install pygame
 
 Como executar
-	1.	Baixe o arquivo forca_matematica.py (o script do jogo).
+	1.	Baixe o arquivo main.py (o script do jogo).
 	2.	Execute o arquivo com o Python:
 
-python forca_matematica.py
+python main.py
 
 	3.	O jogo abrirá uma janela da forca. Sempre que você quiser tentar uma letra, uma pergunta de matemática aparecerá no terminal.
 	4.	Responda corretamente para que sua tentativa de letra seja aceita. Caso erre a pergunta, perderá uma chance.
